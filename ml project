@@ -1,0 +1,74 @@
+import numpy as np # linear algebra
+import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
+import matplotlib.pyplot as plt
+import seaborn as sns
+import math
+# Input data files are available in the "../input/" directory.
+# For example, running this (by clicking run or pressing Shift+Enter) will list the files in the input directory
+
+import os
+#print(os.listdir("/content/RS_Session_246_AS11.csv","/content/RS_Session_246_AU_98_1.1.csv"))
+# os.listdir() accepts only one argument which should be the path to the directory
+# To print the files, list the paths individually
+print(os.listdir("/content/")) # Assuming files are in /content/
+# Or list the files by name
+print("RS_Session_246_AS11.csv", "RS_Session_246_AU_98_1.1.csv")
+df = pd.read_csv("/content/RS_Session_246_AU_98_1.1.csv")
+df.tail()
+df.drop(df.index[[36]], inplace=True)
+df.isnull().sum() # There are no missing values
+plt.figure(figsize=(15, 15));
+df.groupby(["State/UT", "2021- Cases registered", "2022 - Cases registered", "2023- Cases registered"]).sum().plot(kind="bar",width=0.7, figsize=(15, 10), title="State Vs Total Case Registered Against Women");
+plt.plot();
+df.head()
+plt.figure(figsize=(15, 15));
+df.groupby(["State/UT", "2021 - Total rape Cases", "2022 - Total rape Cases", "2023 - Total rape Cases"]).sum().plot(kind="bar",width=0.7, figsize=(15, 10), title="State Vs Total Rape Case Registered Against Women");
+plt.plot();
+# Check the actual column names in your DataFrame
+print(df.columns)
+
+# Assuming there's a typo and the actual column name is "2021 - Total rape Cases"
+# (as seen in the code of input-43)
+print(df[["State/UT", "2021- Cases registered", "2021 - Total rape Cases"]])
+print(df[["State/UT", "2022 - Cases registered", "2022 - Total rape Cases"]])
+print(df[["State/UT", "2023- Cases registered", "2023 - Total rape Cases"]])
+#rape percentage
+df["Rape_2021_perc"] = (df["2021 - Total rape Cases"]/df["2021- Cases registered"])*100
+df["Rape_2021_perc"] = df["Rape_2021_perc"].map(lambda x: round(x, 2))
+df["Rape_2022_perc"] = (df["2022 - Total rape Cases"]/df["2022 - Cases registered"])*100
+df["Rape_2022_perc"] = df["Rape_2022_perc"].map(lambda x: round(x, 2))
+df["Rape_2023_perc"] = (df["2023 - Total rape Cases"]/df["2023- Cases registered"])*100
+df["Rape_2023_perc"] = df["Rape_2023_perc"].map(lambda x: round(x, 2))
+df.head()
+# Display rape percentage for all states
+print(df[["State/UT", "Rape_2021_perc", "Rape_2022_perc", "Rape_2023_perc"]])
+ax = df.groupby('State/UT')[["Rape_2021_perc", "Rape_2022_perc", "Rape_2023_perc"]].sum().plot.bar(stacked=True, figsize=(15, 15), title="State Vs Rape Percentage")
+ax.set_xlabel("States")
+ax.set_ylabel("Percentage(%)")
+import pandas as pd
+
+# Read the CSV file into a DataFrame
+df2 = pd.read_csv("/content/RS_Session_246_AS11.csv")
+
+# Display all rows of the DataFrame
+df2
+# Remove total column
+df2.drop(df2.index[[37, 38, 29]], inplace=True)
+df_only_states_ut = df2.iloc[:37, :]
+df_only_states_ut.drop(df_only_states_ut.index[29], inplace=True)
+df_only_states_ut.groupby("States/UTs").sum().plot.barh(figsize=(15,25), width=0.7);
+import pandas as pd
+
+# Convert columns with numeric values to a numeric type before performing the sum
+for column in df2.columns:
+    if column != "States/UTs":  # Assuming "States/UTs" is the only non-numeric column
+        try:
+            # Try converting to numeric, errors will be coerced to NaN
+            df2[column] = pd.to_numeric(df2[column], errors='coerce')
+        except ValueError:
+            pass  # Handle the error, e.g., print a message or skip the column
+
+# Create a 'total_crime' column by summing across the crime type columns for each state:
+df2["total_crime"] = df2.drop(columns=["States/UTs"]).sum(axis=1) # Sum across columns
+
+df2  # Display all rows of df2 (including all states and total crime across 3 years)
